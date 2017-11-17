@@ -1,6 +1,9 @@
 package Connector_Input;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -8,6 +11,7 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import org.apache.commons.io.IOUtils;
 import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.GenericTopLevel;
@@ -17,20 +21,38 @@ import org.sbolstandard.core2.SBOLValidationException;
 import org.synbiohub.frontend.SynBioHubException;
 import org.synbiohub.frontend.SynBioHubFrontend;
 
+import SBOL_TASBE_Connector.TASBE_Collections;
+import net.sf.json.JSONObject;
+
 public class Connector_Tester {
 
 	public static void main(String[] args) throws URISyntaxException, SBOLValidationException, SynBioHubException, IOException, SBOLConversionException {
 		
-		String prefix = "https://synbiohub.utah.edu";
-		String email = "mehersam251@gmail.com";
-		String pass = "S@ipav12";
+		if(args[0] == null){
+			System.out.println("Please give a settings file as input.");
+			System.exit(1);
+		}
+		String config_file_name = args[0]; 
+		System.out.println(config_file_name); 
+		File f = new File(Connector_Tester.class.getResource(config_file_name).toURI());
+	    InputStream is = new FileInputStream(f);
+	    String jsonTxt = IOUtils.toString(is, "UTF-8");
+	    JSONObject json = JSONObject.fromString(jsonTxt);       
 		
-		String id = "TASBE_Tutorial_Example_Controls";
-		String version = "1";
-		String name = "Example_Controls";
-		String description = "Example controls containing .fcs files"; 
-		
-		String topLevel = "https://synbiohub.utah.edu/user/mehersam/" + id + "/" + id + "_collection" + "/" + version; 
+
+	     String prefix = json.getString("prefix" );
+	     String email = json.getString( "email" );
+	     String pass = json.getString( "pass" );
+	     String version = json.getString( "version" );
+	     String id = json.getString("id"); 
+	     String name = json.getString("name"); 
+	     String desc = json.getString("desc"); 
+	     String topLevel = json.getString("topLevel"); 
+	     String input_col = json.getString("input_col");
+	     String agent = json.getString("agent"); 
+	     String color_model = json.getString("color_model"); 
+	     String batch_analysis = json.getString("batch_analysis");
+
 		URI TP_collection = URI.create(topLevel); 
 		String prURI = "https://sbols.org/"; 
 		
@@ -71,7 +93,7 @@ public class Connector_Tester {
 		document.write("Tester.xml");
 		SynBioHubFrontend fb = new SynBioHubFrontend(prefix, prefix);
 		fb.login(email, pass);
-		fb.submit(id, version, name, description, "", "", "1", document);
+		fb.submit(id, version, name, desc, "", "", "1", document);
 		
 		SBOLDocument retrieved_doc = new SBOLDocument();
 		System.out.println(topLevel); 
