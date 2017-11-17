@@ -13,15 +13,12 @@ import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.synbiohub.frontend.SynBioHubException;
-
-import matlabcontrol.MatlabConnectionException;
 import net.sf.json.JSONObject;
+
 public class TASBE_Collections {
 
 	public static void main(String[] args) throws URISyntaxException, IOException, SynBioHubException, SBOLValidationException {
 
-		//pretend to download it and pass it to Connector
-		//download a Settings file
 		String config_file_name = args[0]; 
 		System.out.println(config_file_name); 
 		File f = new File(TASBE_Collections.class.getResource(config_file_name).toURI());
@@ -37,10 +34,11 @@ public class TASBE_Collections {
 	     String agent = json.getString("agent"); 
 	     String color_model = json.getString("color_model"); 
 	     String batch_analysis = json.getString("batch_analysis");
+	     
 	     boolean complete = json.getBoolean("complete"); 
 	     boolean create_defaults = json.getBoolean("create_defaults"); 
 		 
-	    Connector syb_connector = new Connector(prefix, email, pass, false, true); 
+	    Connector syb_connector = new Connector(prefix, email, pass, complete, create_defaults); 
 		Collection input_files = syb_connector.get_input_col(new URI(input_col));  //get input_col
 		
 		for(Annotation a : input_files.getAnnotations())

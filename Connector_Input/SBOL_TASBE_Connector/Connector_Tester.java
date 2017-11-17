@@ -83,7 +83,6 @@ public class Connector_Tester {
 		Collection ret_c = retrieved_doc.getCollection("Input_fcs", "1"); 
 		for(GenericTopLevel gtl : retrieved_doc.getGenericTopLevels())
 		{
-			System.out.println(gtl.getDisplayId());
 			for(Annotation a : gtl.getAnnotations())
 				System.out.println(a.getURIValue()); 
 		}

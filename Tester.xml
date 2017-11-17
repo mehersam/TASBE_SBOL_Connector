@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<rdf:RDF xmlns:pr="https://sbols.org/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sbol="http://sbols.org/v2#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:prov="http://www.w3.org/ns/prov#">
+  <pr:fcs_3 rdf:about="https://synbiohub.utah.edu/fcs_3">
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.utah.edu/fcs_3"/>
+    <sbol:displayId>fcs_3</sbol:displayId>
+    <pr:fcs_3 rdf:resource="https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/develop/example_controls/07-29-11_C_006_P3.fcs"/>
+  </pr:fcs_3>
+  <pr:fcs_1 rdf:about="https://synbiohub.utah.edu/fcs_1">
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.utah.edu/fcs_1"/>
+    <sbol:displayId>fcs_1</sbol:displayId>
+    <pr:fcs_1 rdf:resource="https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/develop/example_controls/07-29-11_A_006_P3.fcs"/>
+  </pr:fcs_1>
+  <pr:fcs_2 rdf:about="https://synbiohub.utah.edu/fcs_2">
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.utah.edu/fcs_2"/>
+    <sbol:displayId>fcs_2</sbol:displayId>
+    <pr:fcs_2 rdf:resource="https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/develop/example_controls/07-29-11_B_006_P3.fcs"/>
+  </pr:fcs_2>
+</rdf:RDF>

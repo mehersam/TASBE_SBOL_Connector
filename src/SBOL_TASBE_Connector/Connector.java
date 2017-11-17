@@ -3,11 +3,12 @@ package SBOL_TASBE_Connector;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 import org.sbolstandard.core2.Activity;
-import org.sbolstandard.core2.Agent;
 import org.sbolstandard.core2.Collection;
-import org.sbolstandard.core2.Plan;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.synbiohub.frontend.SynBioHubException;
@@ -68,6 +69,6 @@ public class Connector {
 		//make a get request to get a file
 		HttpDownloadUtility.downloadFile(fileURL, fileName);
 	}
-	
+
 	
 }
