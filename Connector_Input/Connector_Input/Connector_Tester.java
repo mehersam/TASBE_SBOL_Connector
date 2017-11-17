@@ -1,4 +1,4 @@
-package SBOL_TASBE_Connector;
+package Connector_Input;
 
 import java.io.IOException;
 import java.net.URI;
