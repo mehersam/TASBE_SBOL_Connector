@@ -19,6 +19,10 @@ public class TASBE_Collections {
 
 	public static void main(String[] args) throws URISyntaxException, IOException, SynBioHubException, SBOLValidationException {
 
+		if(args[0] == null){
+			System.out.println("Please give a settings file as input.");
+			System.exit(1);
+		}
 		String config_file_name = args[0]; 
 		System.out.println(config_file_name); 
 		File f = new File(TASBE_Collections.class.getResource(config_file_name).toURI());

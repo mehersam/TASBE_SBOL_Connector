@@ -1,0 +1,16 @@
+{'prefix':'https://synbiohub.utah.edu',
+ 'email':'',
+ 'pass':'',
+ 'user':'', 
+ 'id':'TASBE_Tutorial_Example_Controls', 
+ 'version':'1', 
+ 'name':'Example_Controls',
+ 'desc':'Example controls containing .fcs files', 
+ 'topLevel':'', 
+ 'complete':true, 
+ 'create_defaults':true, 
+ 'input_col':'', 
+ 'agent': 'https://github.com/TASBE/TASBEFlowAnalytics/releases/tag/2.0.2', 
+ 'color_model': 'https://github.com/TASBE/TASBEFlowAnalytics-Tutorial/blob/master/template_colormodel/make_color_model.m', 
+ 'batch_analysis': 'https://github.com/TASBE/TASBEFlowAnalytics-Tutorial/blob/master/template_analysis/batch_template.m'
+}

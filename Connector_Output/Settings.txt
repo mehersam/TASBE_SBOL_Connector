@@ -1,0 +1,8 @@
+{'prefix':'https://synbiohub.utah.edu',
+ 'email':'',
+ 'pass':'',
+ 'version':'1', 
+ 'collection_name':'', 
+ 'complete':true, 
+ 'create_defaults':true, 
+}
