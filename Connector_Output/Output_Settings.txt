@@ -1,6 +1,6 @@
 {'prefix':'https://dummy.org',
- 'email':'mehersam251@gmail.com',
- 'pass':'S@ipav12',
+ 'email':'',
+ 'pass':'',
  'version':'1', 
  'id':'TASBE_Controls_Output', 
  'name':'Example_Controls',

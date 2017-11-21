@@ -62,7 +62,7 @@ public class TASBE_Collections {
 	 	  		{	    	
 	 	    	for(Annotation a : tl.getAnnotations()) 
 	 	  	    	{
-	 	    		if(a.getQName().getLocalPart().equals("fcs")){
+	 	    		if(a.getQName().getLocalPart().equals("fcs")){	 	    		
 	 	    			if(a.getStringValue().equals("bead"))
 	 	    				bead = a.getURIValue(); 
 	 	    			if(a.getStringValue().equals("blank"))
