@@ -59,7 +59,7 @@ public class HttpDownloadUtility {
 			String saveFilePath = saveDir + File.separator + fileName;
 
 			// opens an output stream to save into file
-			FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+			FileOutputStream outputStream = new FileOutputStream(fileName);
 
 			int bytesRead = -1;
 			byte[] buffer = new byte[BUFFER_SIZE];

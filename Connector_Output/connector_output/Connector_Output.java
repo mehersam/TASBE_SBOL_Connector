@@ -1,4 +1,4 @@
-package Connector_Output;
+package connector_output;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,8 +24,8 @@ public class Connector_Output {
 	public static void main(String[] args) throws SBOLValidationException, URISyntaxException, IOException, SynBioHubException {
 		// TODO Auto-generated method stub
 
-		File batch_files  = new File(Connector_Output.class.getResource(args[0]).toURI());
-		File cm_files  = new File(Connector_Output.class.getResource(args[1]).toURI());
+		//File batch_files  = new File(Connector_Output.class.getResource(args[0]).toURI());
+		File cm_files  = new File(Connector_Output.class.getResource(args[0]).toURI());
 		File settings  = new File(Connector_Output.class.getResource(args[1]).toURI());
 		
 		InputStream is = new FileInputStream(settings);
@@ -36,6 +36,9 @@ public class Connector_Output {
 		String version = json.getString("version"); 
 		String email = json.getString( "email" );
 		String pass = json.getString( "pass" );
+		String id = json.getString("id"); 
+		String name = json.getString("name"); 
+		String desc = json.getString("desc"); 
 		String collection_name = json.getString("collection_name"); 
 		boolean complete = json.getBoolean("complete"); 
 	    boolean create_defaults = json.getBoolean("create_defaults"); 
@@ -45,27 +48,29 @@ public class Connector_Output {
 		document.setComplete(complete);
 		document.setCreateDefaults(create_defaults);
 		
-		Collection batch_analysis_col = document.createCollection(collection_name); 
+		//Collection batch_analysis_col = document.createCollection(collection_name); 
 		Collection cm_col = document.createCollection(collection_name + "color_model"); 
-		batch_analysis_col.addMember(cm_col.getIdentity());//add CM as a subcollection of BA 
+		//batch_analysis_col.addMember(cm_col.getIdentity());//add CM as a subcollection of BA 
 		
 		//add all of the batch analysis files as attachments
-		for(File f : batch_files.listFiles())
+		/*for(File f : batch_files.listFiles())
 		{
 			GenericTopLevel gtl = document.createGenericTopLevel(f.getName(), new QName("https://sbols.org/", "file", "pr")); 
 			gtl.createAnnotation(new QName(prefix, "fcs_1","pr"), f.getName());			
-		}
+		}*/
 		
 		for(File f : cm_files.listFiles())
 		{
 			GenericTopLevel gtl = document.createGenericTopLevel(f.getName(), new QName("https://sbols.org/", "file", "pr")); 
 			gtl.createAnnotation(new QName(prefix, "fcs_1","pr"), f.getName());
+			cm_col.addMember(gtl.getIdentity()); 
 		}
 		
 		//submit files
 		SynBioHubFrontend fb = new SynBioHubFrontend(prefix, prefix); 
 		fb.login(email, pass);
-		
+		fb.submit(id, version, name, desc, "", "", "1", document);
+
 	}
 
 }

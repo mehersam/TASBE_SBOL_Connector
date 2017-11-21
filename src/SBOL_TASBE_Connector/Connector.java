@@ -9,14 +9,11 @@ import javax.xml.namespace.QName;
 
 import org.sbolstandard.core2.Activity;
 import org.sbolstandard.core2.Collection;
+import org.sbolstandard.core2.GenericTopLevel;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.synbiohub.frontend.SynBioHubException;
 import org.synbiohub.frontend.SynBioHubFrontend;
-
-import matlabcontrol.MatlabConnectionException;
-import matlabcontrol.RemoteMatlabProxy;
-import matlabcontrol.RemoteMatlabProxyFactory;
 
 public class Connector {
 
@@ -47,20 +44,27 @@ public class Connector {
 	//retrieve the collection of fcs files
 	public Collection get_input_col(URI _fcs_col) throws SynBioHubException, SBOLValidationException
 	{	
-		col_doc = hub.getSBOL(_fcs_col); //should be a doc with a collection of uris
+		col_doc = hub.getSBOL(_fcs_col); //this will return the sboldocument
 		Collection retrieved_col = col_doc.getCollection(_fcs_col); 
+		fcs_col = retrieved_col; 
 		return retrieved_col; 
 	} 
 	
-	public void create_Activity(String activity_name, String plan_Id, String batch_analysis, String color_model, String agent_prefix, String _agent, String _usage, String version) throws SBOLValidationException, IOException
+	public void create_Activity(String activity_name, String plan_Id, String color_model, String agent_prefix, String _agent, String _usage, String version, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2) throws SBOLValidationException, IOException
 	{
 		Activity a = built_doc.createActivity(activity_name);
 		a.createUsage(_usage, fcs_col.getIdentity());
 	
 		//assign a plan and an agent
 		built_doc.createPlan(plan_Id); //uri to a script - take this run with Matlab
-		execute_plan(batch_analysis, "batch_template.m");
-		execute_plan(color_model, "color_model.m"); 
+		//execute_plan(batch_analysis, "batch_template.m");
+		execute_plan(color_model, ""); 
+		execute_plan(bead.toString(), ""); 
+		execute_plan(blank.toString(), ""); 
+		execute_plan(EYFP.toString(), ""); 
+		execute_plan(mKate.toString(), ""); 
+		execute_plan(EBFP2.toString(), ""); 
+
 		built_doc.createAgent(agent_prefix, _agent, version); 
 	}
 	
@@ -68,6 +72,20 @@ public class Connector {
 	{
 		//make a get request to get a file
 		HttpDownloadUtility.downloadFile(fileURL, fileName);
+	}
+	
+	public void assemble_collections(Set<File> cm, String prefix) throws SBOLValidationException
+	{
+		SBOLDocument document = new SBOLDocument();
+		document.setDefaultURIprefix(prefix);
+		document.setComplete(true);
+		document.setCreateDefaults(true);
+		
+		for(File f : cm)
+		{
+			GenericTopLevel gtl = document.createGenericTopLevel(f.getName(), new QName(prefix, "CM_file", "pr")); 
+			gtl.createAnnotation(new QName(prefix, "matlab_file","pr"), f.getName());
+		}
 	}
 
 	
