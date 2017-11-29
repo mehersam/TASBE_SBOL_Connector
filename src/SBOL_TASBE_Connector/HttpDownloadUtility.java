@@ -26,7 +26,7 @@ public class HttpDownloadUtility {
 	 *            path of the directory to save the file
 	 * @throws IOException
 	 */
-	public static void downloadFile(String fileURL, String saveDir) throws IOException {
+	public static void downloadFile(String fileURL, String saveDir, String input_file_name) throws IOException {
 		URL url = new URL(fileURL);
 		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
 		int responseCode = httpConn.getResponseCode();
@@ -35,23 +35,29 @@ public class HttpDownloadUtility {
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			String fileName = "";
 			String disposition = httpConn.getHeaderField("Content-Disposition");
-			String contentType = httpConn.getContentType();
-			int contentLength = httpConn.getContentLength();
-
-			if (disposition != null) {
+			//String contentType = httpConn.getContentType();
+			//int contentLength = httpConn.getContentLength();
+ 
+			if(input_file_name != ""){
+				//filename provided as a parameter
+				fileName = input_file_name;
+			}
+			else if (disposition != null) {
 				// extracts file name from header field
 				int index = disposition.indexOf("filename=");
 				if (index > 0) {
 					fileName = disposition.substring(index + 10, disposition.length() - 1);
 				}
-			} else {
+			}
+			else 
+			{
 				// extracts file name from URL
 				fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length());
 			}
 
-			System.out.println("Content-Type = " + contentType);
-			System.out.println("Content-Disposition = " + disposition);
-			System.out.println("Content-Length = " + contentLength);
+			//System.out.println("Content-Type = " + contentType);
+			//System.out.println("Content-Disposition = " + disposition);
+			//System.out.println("Content-Length = " + contentLength);
 			System.out.println("fileName = " + fileName);
 
 			// opens input stream from the HTTP connection
@@ -59,7 +65,7 @@ public class HttpDownloadUtility {
 			String saveFilePath = saveDir + File.separator + fileName;
 
 			// opens an output stream to save into file
-			FileOutputStream outputStream = new FileOutputStream(fileName);
+			FileOutputStream outputStream = new FileOutputStream(saveFilePath);
 
 			int bytesRead = -1;
 			byte[] buffer = new byte[BUFFER_SIZE];

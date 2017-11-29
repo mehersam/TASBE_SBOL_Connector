@@ -14,6 +14,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.io.IOUtils;
 import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Collection;
+import org.sbolstandard.core2.EDAMOntology;
 import org.sbolstandard.core2.GenericTopLevel;
 import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
@@ -47,10 +48,10 @@ public class Connector_Input {
 	     String name = json.getString("name"); 
 	     String desc = json.getString("desc"); 
 
-		String prURI = "https://dummy.org/"; 
-		
+		String tasbeURI = "https://tasbe.org/"; 
+		String docURI = "https://dummy.org/";
 		SBOLDocument document = new SBOLDocument();
-		document.setDefaultURIprefix(prURI);
+		document.setDefaultURIprefix(docURI);
 		document.setComplete(true);
 		document.setCreateDefaults(true);
 		
@@ -59,51 +60,44 @@ public class Connector_Input {
 		
 		GenericTopLevel bead_file = document.createGenericTopLevel(
 				"bead",
-				"",
-				new QName("https://dummy.org/", "fcs", "pr")); 
-		Annotation bead = bead_file.createAnnotation(new QName(prURI, "fcs","pr"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/blob/master/example_controls/2012-03-12_Beads_P3.fcs")); 
-		bead.setStringValue("bead");
-		//bead_file.createAnnotation(new QName(prURI, "file_type","pr"), "bead"); 
+				"1",
+				new QName(tasbeURI, "attachment", "tasbe")); 
+		bead_file.createAnnotation(new QName(tasbeURI, "fcs","tasbe"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/master/example_controls/2012-03-12_Beads_P3.fcs")); 
+		bead_file.createAnnotation(new QName(tasbeURI, "file_type","tasbe"), "bead"); 
 
 		GenericTopLevel blank_file = document.createGenericTopLevel(
 				"blank",
-				"",
-				new QName("https://dummy.org/", "fcs", "pr")); 
-		Annotation blank = blank_file.createAnnotation(new QName(prURI, "fcs","pr"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/blob/master/example_controls/2012-03-12_blank_P3.fcs")); 
-		blank.setStringValue("blank");
-		//blank_file.createAnnotation(new QName(prURI, "file_type","pr"), "blank"); 
+				"1",
+				new QName(tasbeURI, "attachment", "tasbe")); 
+		blank_file.createAnnotation(new QName(tasbeURI, "fcs","tasbe"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/master/example_controls/2012-03-12_blank_P3.fcs")); 
+		blank_file.createAnnotation(new QName(tasbeURI, "file_type","tasbe"), "blank"); 
 		
 		GenericTopLevel EYFP = document.createGenericTopLevel(
 				"EYFP",
-				"",
-				new QName("https://dummy.org/", "fcs", "pr")); 
-		Annotation eyfp = EYFP.createAnnotation(new QName(prURI, "fcs","pr"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/blob/master/example_controls/07-29-11_EYFP_P3.fcs")); 
-		eyfp.setStringValue("color_EYFP");
-		//EYFP.createAnnotation(new QName(prURI, "file_type","pr"), "color_EYFP"); 
+				"1",
+				new QName(tasbeURI, "attachment", "tasbe")); 
+		EYFP.createAnnotation(new QName(tasbeURI, "fcs","tasbe"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/master/example_controls/07-29-11_EYFP_P3.fcs")); 
+		EYFP.createAnnotation(new QName(tasbeURI, "file_type","tasbe"), "EYFP"); 
 
 		GenericTopLevel mKate = document.createGenericTopLevel(
 				"mKate",
-				"",
-				new QName("https://dummy.org/", "fcs", "pr")); 
-		Annotation mkate = mKate.createAnnotation(new QName(prURI, "fcs","pr"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/blob/master/example_controls/07-29-11_mkate_P3.fcs")); 
-		mkate.setStringValue("color_mKate");
-		//mKate.createAnnotation(new QName(prURI, "file_type","pr"), "color_mKate"); 
+				"1",
+				new QName(tasbeURI, "attachment", "tasbe")); 
+		mKate.createAnnotation(new QName(tasbeURI, "fcs","tasbe"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/master/example_controls/07-29-11_mkate_P3.fcs")); 
+		mKate.createAnnotation(new QName(tasbeURI, "file_type","tasbe"), "mKate"); 
 		
 		GenericTopLevel EBFP2 = document.createGenericTopLevel(
 				"EBFP2",
-				"",
-				new QName("https://dummy.org/", "fcs", "pr")); 
-		Annotation ebfp2 = EBFP2.createAnnotation(new QName(prURI, "fcs","pr"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/blob/master/example_controls/07-29-11_EBFP2_P3.fcs")); 
-		ebfp2.setStringValue("color_EBFP2");
-		//EBFP2.createAnnotation(new QName(prURI, "file_type","pr"), "color_EBFP2"); 
+				"1",
+				new QName(tasbeURI, "attachment", "tasbe")); 
+		EBFP2.createAnnotation(new QName(tasbeURI, "fcs","tasbe"),  new URI("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/master/example_controls/07-29-11_EBFP2_P3.fcs")); 
+		EBFP2.createAnnotation(new QName(tasbeURI, "file_type","tasbe"), "EBFP2"); 
 		
-			
 		fcs_files.add(bead_file); 
 		fcs_files.add(blank_file);
 		fcs_files.add(EYFP); 
 		fcs_files.add(mKate); 
 		fcs_files.add(EBFP2); 
-
 		
 		SynBioHubFrontend fb = new SynBioHubFrontend(prefix, prefix);
 		fb.login(email, pass);
