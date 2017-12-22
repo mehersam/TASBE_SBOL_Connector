@@ -1,16 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="Connector_Input"/>
-	<classpathentry kind="src" path="Connector_Output"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/libSBOLj-core2"/>
 	<classpathentry kind="lib" path="C:/Users/Meher/Documents/Masters_Program/thesis/TASBE_SBOL_Connector/RemoteExample.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Meher/Documents/Masters_Program/thesis/SBOLTestRunner/SB_Tester/apache-commons-lang.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Meher/Documents/Masters_Program/thesis/SBOLTestRunner/SB_Tester/ezmorph-1.0.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Meher/Documents/Masters_Program/thesis/SBOLTestRunner/SB_Tester/json-lib-0.9.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Meher/Documents/Masters_Program/thesis/SBOLTestRunner/SB_Tester/org.apache.commons.beanutils.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Meher/Documents/Masters_Program/thesis/SBOLTestRunner/SB_Tester/org.json.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Meher/Documents/Masters_Program/thesis/SBOLTestRunner/json-simple-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Meher/.m2/repository/commons-io/commons-io/1.3.2/commons-io-1.3.2.jar">
 		<attributes>

@@ -1,18 +1,23 @@
 package SBOL_TASBE_Connector;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.xml.namespace.QName;
 
 import org.sbolstandard.core2.Activity;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.GenericTopLevel;
+import org.sbolstandard.core2.Plan;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.synbiohub.frontend.SynBioHubException;
@@ -28,50 +33,144 @@ public class Connector {
 	private SBOLDocument col_doc; 
 	private Collection fcs_col; 
 	private String prefix;
-	
-	public Connector(String _prefix, String email, String pass, boolean complete, boolean create_defaults) throws SynBioHubException
+	private Activity cm_act = null; 
+	private String user = ""; 
+	public Connector(String backendUrl, String _prefix) throws SynBioHubException
 	{		
 		prefix = _prefix; 
-		hub = new SynBioHubFrontend(prefix, prefix);
-		hub.login(email, pass);
+		hub = new SynBioHubFrontend(backendUrl, backendUrl);
 		
 		built_doc = new SBOLDocument();
 		built_doc.setDefaultURIprefix(prefix);
-		built_doc.setComplete(complete);
-		built_doc.setCreateDefaults(create_defaults);
+		built_doc.setComplete(true);
+		built_doc.setCreateDefaults(true);
 	}
 	
-	public void submit(String id, String version, String name, String desc, SBOLDocument doc) throws SynBioHubException
+	public void setUser(String _user)
 	{
-		hub.submit(id, version, name, desc, "", "", "1", doc);
+		this.user = _user; 
+	}
+	
+	public String getUser()
+	{
+		return this.user; 
+	}
+	
+	public void login(String email, String pass) throws SynBioHubException
+	{
+		hub.login(email, pass);
+
+	}
+	
+	public void submit(String id, String version, SBOLDocument doc) throws SynBioHubException
+	{
+		hub.submit(id, version, true , doc);
+	}
+	
+	public void submit(String id, String version, String file) throws SynBioHubException, IOException
+	{
+		//add to an empty collection
+		hub.submit(id, version, true, file);
 	}
 	
 	//retrieve the collection of fcs files
-	public SBOLDocument get_input_col(URI _fcs_col) throws SynBioHubException, SBOLValidationException
+	public SBOLDocument get_input_col(URI _fcs_col, String prefix) throws SynBioHubException, SBOLValidationException
 	{	
 		col_doc = hub.getSBOL(_fcs_col); //this will return the sboldocument
 		fcs_col = col_doc.getCollection(_fcs_col); 
+		
 		return col_doc; 
 	} 
+	public SBOLDocument get_Component(URI output_col) throws SynBioHubException
+	{
+		return hub.getSBOL(output_col); 
+	}
 	
-	public void create_Activity(String activity_name, String plan_Id, String color_model, String agent_prefix, String _agent, String _usage, String version, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2) throws SBOLValidationException, IOException
+	public SBOLDocument get_Built_Doc()
+	{
+		return this.built_doc; 
+	}
+	public void create_Activity(String savedir, String activity_name, String plan_Id, String color_model, String agent_prefix, String _agent, String _usage, String version, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2) throws SBOLValidationException
 	{
 		Activity a = built_doc.createActivity(activity_name);
 		a.createUsage(_usage, fcs_col.getIdentity());
-	
+		cm_act = a; 
 		//assign a plan and an agent
-		built_doc.createPlan(plan_Id); //uri to a script - take this run with Matlab
+		Plan cm_plan = built_doc.createPlan(plan_Id); //uri to a script - take this run with Matlab
 		//execute_plan(batch_analysis, "batch_template.m");
-		String savedir = "C:\\Users\\Meher\\Documents\\MATLAB\\TASBEFlowAnalytics\\";
-		HttpDownloadUtility.downloadFile(color_model, savedir + "\\code\\" , "make_color_model.m");
-		HttpDownloadUtility.downloadFile(bead.toString(),savedir , "2012-03-12_Beads_P3.fcs");
-		HttpDownloadUtility.downloadFile(blank.toString(),savedir, "2012-03-12_blank_P3.fcs");
-		HttpDownloadUtility.downloadFile(EYFP.toString(), savedir, "2012-03-12_EYFP_P3.fcs");
-		HttpDownloadUtility.downloadFile(mKate.toString(), savedir, "2012-03-12_mkate_P3.fcs");
-		HttpDownloadUtility.downloadFile(EBFP2.toString(), savedir, "2012-03-12_ebfp2_P3.fcs");
+//		/HttpDownloadUtility.downloadFile(color_model, savedir + "\\code\\" , "make_color_model.m");
+		try {
+			HttpDownloadUtility.downloadFile(bead.toString(),savedir , "2012-03-12_Beads_P3.fcs");
+			HttpDownloadUtility.downloadFile(blank.toString(),savedir, "2012-03-12_blank_P3.fcs");
+			HttpDownloadUtility.downloadFile(EYFP.toString(), savedir, "2012-03-12_EYFP_P3.fcs");
+			HttpDownloadUtility.downloadFile(mKate.toString(), savedir, "2012-03-12_mkate_P3.fcs");
+			HttpDownloadUtility.downloadFile(EBFP2.toString(), savedir, "2012-03-12_ebfp2_P3.fcs");
+		} catch (IOException e) {
+			System.out.println("File could not be downloaded"); 
+			e.printStackTrace();
+		}
+
 		
 		built_doc.createAgent(agent_prefix, _agent, version); 
 	}
+	
+	public void assemble_CM(Set<File> color_model)
+	{
+		 //zip up the set of files
+		try
+		{
+			byte[] buffer = new byte[1024]; 
+			
+			FileOutputStream fos = new FileOutputStream("ColorModelOutput.zip"); 
+			ZipOutputStream zos = new ZipOutputStream(fos); 
+			
+			for(File cm_file : color_model)
+			{
+				FileInputStream fis = new FileInputStream(cm_file); 
+				
+				zos.putNextEntry(new ZipEntry(cm_file.getName()));
+				
+				int length; 
+				
+				while((length = fis.read(buffer)) > 0)
+				{
+					zos.write(buffer, 0, length);
+				}
+				
+				zos.closeEntry(); 
+				fis.close();
+			}
+			zos.close();
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error in creating the zip file: " + e); 
+		}
+	}
+	
+	public SBOLDocument assemble_CM(Set<File> cm, String doc_prefix, String file_prefix) throws SBOLValidationException
+	{
+		SBOLDocument document = new SBOLDocument();
+		document.setDefaultURIprefix(doc_prefix);
+		document.setComplete(true);
+		document.setCreateDefaults(true);
+		
+		Collection cm_col = document.createCollection("color_model"); 
+		//cm_col.addWasGeneratedBy(cm_act.getIdentity()); 
+		//cm_col.addWasDerivedFrom(fcs_col.getIdentity()); 
+		for(File f : cm)
+		{
+			String filename = f.getName().replace("-", "_");
+			filename = filename.replace(".", "_");
+			filename = filename.concat("_copy");
+			GenericTopLevel gtl = document.createGenericTopLevel(filename, new QName(file_prefix, "m_attachment", "tasbe")); 
+			gtl.createAnnotation(new QName(file_prefix, "color_model","CM"), f.getName());
+			cm_col.addMember(gtl.getIdentity()); 
+		}	
+		
+		return document; 
+	}
+		
 	
 	public SBOLDocument assemble_collections(Set<File> cm, Set<File> batch_analysis, String doc_prefix, String file_prefix) throws SBOLValidationException, URISyntaxException, SynBioHubException
 	{
@@ -112,38 +211,30 @@ public class Connector {
 		{
 			filename = saveDir + filename; 
 		}
-		FileWriter fw =  new FileWriter(filename);
+		File file = new File(filename); 
+		FileWriter fw =  new FileWriter(file);
 		fw.write(writer.toString());
 		fw.close();
 	}
 	
-	public String matlab_work(String pathToTASBE) throws EngineException, InterruptedException, IOException 
+	public void matlab_work(String pathToTASBE) throws EngineException, InterruptedException, IOException 
 	{
 		MatlabEngine eng = MatlabEngine.startMatlab();
         StringWriter writer = new StringWriter();
-		String matlab_dir = "C:\\Users\\Meher\\Documents\\MATLAB\\plots";
-		String plot_dir = ""; 
+		String matlab_dir = pathToTASBE + "\\plots";
+		//String plot_dir = ""; 
 		try{
 			eng.eval("addpath('" + pathToTASBE + "'" + ")");
 			eng.eval("cd " + pathToTASBE);
 			eng.eval("cd ../");
-			eng.eval("pwd");
-			//this dir should be in TASBEFlowAnalytics dir
 			eng.eval("mkdir('" + "example_controls\\')"); 
 			//eng.eval("mkdir('" + pathToTASBE + "\\example_controls\\')"); 
 			eng.eval("movefile *.fcs example_controls\\"); //move all the fcs files in TASBEdir to examplecontrols
 			eng.eval("cd " + pathToTASBE);
-			
 			eng.eval("make_color_model", writer, null); //run makecolor model
-			
-			if(writer.getBuffer().length() > 0)
-			{
-				getErrors(writer, ""); 
-				System.out.println(writer.toString());
-			}
 			eng.eval("plots = dir( '" + matlab_dir + "')");
 			eng.eval("plot_dir = plots.folder");
-			plot_dir = eng.getVariable("plot_dir");
+			//plot_dir = eng.getVariable("plot_dir");
 			
 		}
 		catch(Exception e)
@@ -151,6 +242,7 @@ public class Connector {
 		}
         writer.close();
 		eng.close();
-		return plot_dir;
+		writer.flush(); 
+		getErrors(writer, ""); 
 	}
 }
