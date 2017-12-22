@@ -170,7 +170,8 @@ public class BrowseDialog extends JDialog implements ActionListener {
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}   
+					}
+				JOptionPane.showMessageDialog(inputDocFrame, "Complete!");
 				return;
 			}
 			else if(input_document.getText() == ""){
