@@ -161,15 +161,15 @@ public class Connector {
 	}
 	public void create_Activity(String activity_name, String plan_Id,  String agent_prefix, String _agent, String _usage, String version)
 	{
-		String tasbeURI = "https://github.com/jakebeal/TASBEFlowAnalytics/releases"; 
+		String tasbeURI = "https://synbiohub.utah.edu/user/mehersam/SBOL_Software/TASBEFlowAnalytics/1.0"; 
 		try {
 			//create the CM activity
-			cm_act = built_doc.createActivity(activity_name);
+			cm_act = built_doc.createActivity(activity_name, version);
 			
 			cm_act.createUsage(_usage, fcs_col.getIdentity()); //input collection
 			
 			//create the CM plan
-			plan = built_doc.createPlan(plan_Id);
+			plan = built_doc.createPlan(plan_Id, version);
 			
 			//create the CM association
 			Association tasbe = cm_act.createAssociation(activity_name + "_association", new URI(tasbeURI)); 

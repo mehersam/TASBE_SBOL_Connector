@@ -14,8 +14,10 @@ import org.omg.CORBA_2_3.portable.InputStream;
 import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.GenericTopLevel;
+import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
+import org.sbolstandard.core2.SBOLWriter;
 import org.sbolstandard.core2.TopLevel;
 import org.synbiohub.frontend.SynBioHubException;
 import org.synbiohub.frontend.SynBioHubFrontend;
@@ -161,7 +163,7 @@ public class ConnectorController {
 				final_cm_col.addMember(m.getIdentity());
 			}
 
-			// and this collection has a wasGeneratedBy which references the activity built
+			// this collection has a wasGeneratedBy which references the activity built
 			final_cm_col.addWasGeneratedBy(syb_connector.getActivity().getIdentity());
 			
 		} catch (SynBioHubException e) {
@@ -173,7 +175,14 @@ public class ConnectorController {
 
 		System.out.println("Submitting Final Doc");
 		// upload final document
-
+		
+		
+		try {
+			SBOLWriter.write(finalDoc, "Final_TASBE.xml");
+		} catch (SBOLConversionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		syb_connector.submit("TASBE_SBOL_Final_Doc", version, "TASBE_SBOL_Final_Doc", "TASBE_SBOL_Final_Doc", finalDoc);
 
 		URI planURI = new URI("https://synbiohub.utah.edu/user/" + user + "/TASBE_SBOL_Final_Doc/"
