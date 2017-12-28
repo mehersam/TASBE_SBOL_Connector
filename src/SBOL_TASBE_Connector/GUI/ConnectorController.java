@@ -25,15 +25,15 @@ import com.mathworks.engine.EngineException;
 import SBOL_TASBE_Connector.Connector;
 
 public class ConnectorController {
-	
-	private Connector syb_connector = null; 
-	private BrowseDialog browse = null; 
-	
-	public ConnectorController(Connector _connect, BrowseDialog _browse) throws SynBioHubException, SBOLValidationException, URISyntaxException, IOException, EngineException, InterruptedException
-	{
-		syb_connector = _connect; 
+
+	private Connector syb_connector = null;
+	private BrowseDialog browse = null;
+
+	public ConnectorController(Connector _connect, BrowseDialog _browse) throws SynBioHubException,
+			SBOLValidationException, URISyntaxException, IOException, EngineException, InterruptedException {
+		syb_connector = _connect;
 		browse = _browse;
-		
+
 		String input_fcs_col = browse.get_input_col();
 		String tasbeURI = "https://tasbe.org/";
 
@@ -47,7 +47,7 @@ public class ConnectorController {
 		URI EBFP2 = null;
 
 		for (TopLevel tl : input_files.getMembers()) {
-			URI temp = null; 
+			URI temp = null;
 			for (Annotation a : tl.getAnnotations()) {
 				if (a.getQName().getNamespaceURI().equals(tasbeURI) && a.getQName().getLocalPart().equals("fcs")) {
 					temp = a.getURIValue();
@@ -82,26 +82,30 @@ public class ConnectorController {
 		String displayId = input_files.getDisplayId();
 		String version = input_files.getVersion();
 		String color_model_loc = browse.get_CM();
-		String agent = browse.getAgent(); 
+		String agent = browse.getAgent();
 		String tasbe_loc = browse.getTasbeLoc();
-		String user = syb_connector.getUser(); 
-		// create the activity and download the files and save them in the Tasbe dir
-		syb_connector.create_Activity(tasbe_loc, displayId + "_activity", displayId + "_color_model", color_model_loc, agent,
-				displayId + "_agent", displayId + "_usage", version, bead, blank, EYFP, mKate, EBFP2);
+		String user = syb_connector.getUser();
+
+		// download the files and save them in the Tasbe dir
+		syb_connector.download_Files(tasbe_loc, color_model_loc, bead, blank, EYFP, mKate, EBFP2);
+
+		// create the activity
+		syb_connector.create_Activity(displayId + "_activity", displayId + "_color_model", agent, displayId + "_agent",
+				displayId + "_usage", version);
 
 		// need to open a file explorer to choose where the tasbe package is
-		//go do matlab work because files should be there.
-		
-//		JOptionPane.showMessageDialog(browse, "Beginning Matlab work");
-//		
-//		System.out.println("Beginning Matlab work"); 
-//		syb_connector.matlab_work(tasbe_loc + "\\code");
-//		
-//		JOptionPane.showMessageDialog(browse, "Finished Matlab work");
-//		System.out.println("Finished Matlab work"); 
+		// go do matlab work because files should be there.
+
+		// JOptionPane.showMessageDialog(browse, "Beginning Matlab work");
+		//
+		// System.out.println("Beginning Matlab work");
+		// syb_connector.matlab_work(tasbe_loc + "\\code");
+		//
+		// JOptionPane.showMessageDialog(browse, "Finished Matlab work");
+		// System.out.println("Finished Matlab work");
 
 		String plot_dir = tasbe_loc + "\\code\\plots";
-		
+
 		File file_base = new File(plot_dir);
 
 		Set<File> cm_files = new HashSet<File>();
@@ -113,62 +117,73 @@ public class ConnectorController {
 
 			syb_connector.assemble_CM(cm_files);
 			syb_connector.assemble_collections(cm_files, cm_files, "https://dummy.org", tasbeURI);
-			
-			JOptionPane.showMessageDialog(browse, "Assembling CM files");
-			System.out.println("Assembling CM files"); 
 
-			syb_connector.assemble_CM(cm_files, "https://dummy.org", tasbeURI); 
-			
+			JOptionPane.showMessageDialog(browse, "Assembling CM files");
+			System.out.println("Assembling CM files");
+
+			syb_connector.assemble_CM(cm_files, "https://dummy.org", tasbeURI);
+
 			JOptionPane.showMessageDialog(browse, "Submitting CM Collection");
-			System.out.println("Submitting CM Collection"); 
-			
-			//InputStream colormodel = ConnectorController.class.getResourceAsStream("ColorModelOutput.zip"); 
+			System.out.println("Submitting CM Collection");
+
+			// InputStream colormodel =
+			// ConnectorController.class.getResourceAsStream("ColorModelOutput.zip");
 
 			syb_connector.submit("TASBE_Output", version, "TASBE_Output", "TASBE_Output", "ColorModelOutput.zip");
-			
-			JOptionPane.showMessageDialog(browse, "Finished Submitting CM Collection");
-			System.out.println("Finished Submitting CM Collection"); 
 
-					} else {
+			JOptionPane.showMessageDialog(browse, "Finished Submitting CM Collection");
+			System.out.println("Finished Submitting CM Collection");
+
+		} else {
 			System.out.println("Errors occurred in making the color model. Please check error file");
 		}
 
 		JOptionPane.showMessageDialog(browse, "Building Final Doc");
-		System.out.println("Building Final Doc"); 
-		SBOLDocument finalDoc = syb_connector.get_Built_Doc(); 
-		
-		//the output collection should have a URIs for the attachments		
-		URI output_col = new URI("https://synbiohub.utah.edu/user/" + user + "/TASBE_Output/TASBE_Output_collection/" + version); 
-		SynBioHubFrontend frontend = syb_connector.getFrontend(); 
-		
-		try{
-		Collection retrieved_output_col = frontend.getSBOL(output_col).getCollection(output_col); 
-		//make a new collection that with references to the URIs of the members from previous collection
-		Collection final_cm_col = finalDoc.createCollection("TASBE_Color_Model_Output"); 
-		for(TopLevel m : retrieved_output_col.getMembers())
-		{
+		System.out.println("Building Final Doc");
+		SBOLDocument finalDoc = syb_connector.get_Built_Doc();
+
+		SynBioHubFrontend frontend = syb_connector.getFrontend();
+
+		// the output collection should have a URIs for the attachments
+		URI output_col = new URI(
+				"https://synbiohub.utah.edu/user/" + user + "/TASBE_Output/TASBE_Output_collection/" + version);
+
+		try {
+			// retrieve uploaded TASBE CM output collection
+			SBOLDocument retrieved_output = frontend.getSBOL(output_col);
+			Collection retrieved_output_col = retrieved_output.getCollection(output_col);
+
+			// make a new collection that with references to the URIs of the members from TASBE CM output collection
+			Collection final_cm_col = finalDoc.createCollection("TASBE_Color_Model_Output");
 			
-			final_cm_col.addMember(m.getIdentity()); 
-		}
-		//and this collection has a wasGeneratedBy which references the activity built
-		final_cm_col.addWasGeneratedBy(syb_connector.getActivity().getIdentity());
-		}
-		catch(SynBioHubException e)
-		{
+			for (TopLevel m : retrieved_output_col.getMembers()) {
+				finalDoc.createCopy(m);
+				final_cm_col.addMember(m.getIdentity());
+			}
+
+			// and this collection has a wasGeneratedBy which references the activity built
+			final_cm_col.addWasGeneratedBy(syb_connector.getActivity().getIdentity());
+			
+		} catch (SynBioHubException e) {
 			e.printStackTrace();
 			System.exit(1);
-		}
+		} 
+
 		JOptionPane.showMessageDialog(browse, "Submitting Final Doc!");
 
-		System.out.println("Submitting Final Doc"); 
-		//upload final document
-		
+		System.out.println("Submitting Final Doc");
+		// upload final document
+
 		syb_connector.submit("TASBE_SBOL_Final_Doc", version, "TASBE_SBOL_Final_Doc", "TASBE_SBOL_Final_Doc", finalDoc);
+
+		URI planURI = new URI("https://synbiohub.utah.edu/user/" + user + "/TASBE_SBOL_Final_Doc/"
+				+ syb_connector.getPlan().getDisplayId() + "/" + version);
+		
+		frontend.attachFile(planURI, tasbe_loc + "/color_model.m");
+
 		JOptionPane.showMessageDialog(browse, "Complete!");
-		System.exit(0); 
-	
+		System.exit(0);
+
 	}
-	
-	
 
 }

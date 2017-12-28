@@ -2,6 +2,7 @@ package SBOL_TASBE_Connector;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -140,33 +141,12 @@ public class Connector {
 	{
 		return this.built_doc; 
 	}
-	public void create_Activity(String savedir, String activity_name, String plan_Id, String color_model, String agent_prefix, String _agent, String _usage, String version, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2)
+	
+	public void download_Files(String savedir, String color_model, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2)
 	{
-		Activity a = null;
-		String tasbeURI = "https://github.com/jakebeal/TASBEFlowAnalytics/releases"; 
 		try {
-			//TODO
-			a = built_doc.createActivity(activity_name);
-			a.createUsage(_usage, fcs_col.getIdentity());
-			
-			Association tasbe = a.createAssociation(activity_name + "_association", new URI(tasbeURI)); 
-			//tasbe.addRole(); //test role sbol onotology?
-
-			Plan cm_plan = built_doc.createPlan(plan_Id);
-			plan = cm_plan; 
-			cm_plan.createAnnotation(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "attachment", "sbh"), new URI(color_model));
-			//cm_plan.addWasGeneratedBy(new URI(color_model)); //URI to the script
-			
-			tasbe.setPlan(cm_plan.getIdentity());
-			
-			
-		} catch (SBOLValidationException|URISyntaxException e1) {
-			e1.printStackTrace();
-			System.exit(1);
-		} 
-		cm_act = a; 
-		try {
-			HttpDownloadUtility.downloadFile(color_model,savedir , "");
+			HttpDownloadUtility.downloadFile(color_model, savedir , "color_model.m");
+		//	HttpDownloadUtility.downloadFile(color_model, "" , "color_model.m");
 			HttpDownloadUtility.downloadFile(bead.toString(),savedir , "2012-03-12_Beads_P3.fcs");
 			HttpDownloadUtility.downloadFile(blank.toString(),savedir, "2012-03-12_blank_P3.fcs");
 			HttpDownloadUtility.downloadFile(EYFP.toString(), savedir, "2012-03-12_EYFP_P3.fcs");
@@ -177,6 +157,32 @@ public class Connector {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		
+	}
+	public void create_Activity(String activity_name, String plan_Id,  String agent_prefix, String _agent, String _usage, String version)
+	{
+		String tasbeURI = "https://github.com/jakebeal/TASBEFlowAnalytics/releases"; 
+		try {
+			//create the CM activity
+			cm_act = built_doc.createActivity(activity_name);
+			
+			cm_act.createUsage(_usage, fcs_col.getIdentity()); //input collection
+			
+			//create the CM plan
+			plan = built_doc.createPlan(plan_Id);
+			
+			//create the CM association
+			Association tasbe = cm_act.createAssociation(activity_name + "_association", new URI(tasbeURI)); 
+			//tasbe.addRole(); //test role sbol onotology?
+
+			//set the plan to the association
+			tasbe.setPlan(plan.getIdentity());
+			
+			
+		} catch (SBOLValidationException|URISyntaxException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		} 
 
 	}
 	
