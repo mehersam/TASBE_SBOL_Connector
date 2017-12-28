@@ -37,8 +37,7 @@ public class BrowseDialog extends JDialog implements ActionListener {
 	private String CM_scr_loc = "";
 	private JFrame inputDocFrame = null;
 	
-	//https://synbiohub.utah.edu/user/mehersam/TASBE_Tutorial_Example_Controls/TASBE_Tutorial_Example_Controls_collection/1
-	private JTextField input_document = new JTextField("");
+	private JTextField input_document = new JTextField("https://synbiohub.utah.edu/user/mehersam/TASBE_Tutorial_Example_Controls/TASBE_Tutorial_Example_Controls_collection/1");
 	//private JTextField version = new JTextField("1");
 	private JTextField agent = new JTextField("https://github.com/TASBE/TASBEFlowAnalytics/releases/tag/2.0.2");
 	private JTextField color_model = new JTextField("https://github.com/jakebeal/TASBEFlowAnalytics-Tutorial/raw/master/template_colormodel/make_color_model.m");
@@ -171,7 +170,6 @@ public class BrowseDialog extends JDialog implements ActionListener {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-				JOptionPane.showMessageDialog(inputDocFrame, "Complete!");
 				return;
 			}
 			else if(input_document.getText() == ""){

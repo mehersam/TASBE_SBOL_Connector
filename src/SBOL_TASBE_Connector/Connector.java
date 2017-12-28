@@ -15,6 +15,8 @@ import java.util.zip.ZipOutputStream;
 import javax.xml.namespace.QName;
 
 import org.sbolstandard.core2.Activity;
+import org.sbolstandard.core2.Agent;
+import org.sbolstandard.core2.Association;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.GenericTopLevel;
 import org.sbolstandard.core2.Plan;
@@ -34,6 +36,7 @@ public class Connector {
 	private Collection fcs_col; 
 	private String prefix;
 	private Activity cm_act = null; 
+	private Plan plan = null; 
 	private String user = ""; 
 	public Connector(String backendUrl, String _prefix) throws SynBioHubException
 	{		
@@ -46,6 +49,12 @@ public class Connector {
 		built_doc.setCreateDefaults(true);
 	}
 	
+	public SynBioHubFrontend getFrontend()
+	{
+		
+		return this.hub;
+		
+	}
 	public void setUser(String _user)
 	{
 		this.user = _user; 
@@ -55,51 +64,109 @@ public class Connector {
 	{
 		return this.user; 
 	}
-	
-	public void login(String email, String pass) throws SynBioHubException
+	public Plan getPlan()
 	{
-		hub.login(email, pass);
+		return this.plan; 
+	}
+	
+	public Activity getActivity()
+	{
+		return this.cm_act; 
+	}
+	
+	public void login(String email, String pass) 
+	{
+		try {
+			hub.login(email, pass);
+		} catch (SynBioHubException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 
 	}
 	
-	public void submit(String id, String version, SBOLDocument doc) throws SynBioHubException
+	public void submit(String id, String version, String name, String desc, SBOLDocument doc) 
 	{
-		hub.submit(id, version, true , doc);
+		try {
+			hub.createCollection(id, version, name, desc, "",true, doc);
+		} catch (SynBioHubException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
-	public void submit(String id, String version, String file) throws SynBioHubException, IOException
+	public void submit(String id, String version, String name, String desc, String file)
 	{
 		//add to an empty collection
-		hub.submit(id, version, true, file);
+		try {
+			hub.createCollection(id, version, name, desc, "", true, file);
+		} catch (SynBioHubException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
 	//retrieve the collection of fcs files
-	public SBOLDocument get_input_col(URI _fcs_col, String prefix) throws SynBioHubException, SBOLValidationException
+	public SBOLDocument get_input_col(URI _fcs_col, String prefix)
 	{	
-		col_doc = hub.getSBOL(_fcs_col); //this will return the sboldocument
+		try {
+			col_doc = hub.getSBOL(_fcs_col);
+		} catch (SynBioHubException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		} //this will return the sboldocument
 		fcs_col = col_doc.getCollection(_fcs_col); 
 		
 		return col_doc; 
 	} 
-	public SBOLDocument get_Component(URI output_col) throws SynBioHubException
+	public SBOLDocument get_Component(URI output_col) 
 	{
-		return hub.getSBOL(output_col); 
+		SBOLDocument found_doc = null; 
+		try {
+			found_doc = hub.getSBOL(output_col);
+		} catch (SynBioHubException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return found_doc; 
 	}
 	
 	public SBOLDocument get_Built_Doc()
 	{
 		return this.built_doc; 
 	}
-	public void create_Activity(String savedir, String activity_name, String plan_Id, String color_model, String agent_prefix, String _agent, String _usage, String version, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2) throws SBOLValidationException
+	public void create_Activity(String savedir, String activity_name, String plan_Id, String color_model, String agent_prefix, String _agent, String _usage, String version, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2)
 	{
-		Activity a = built_doc.createActivity(activity_name);
-		a.createUsage(_usage, fcs_col.getIdentity());
-		cm_act = a; 
-		//assign a plan and an agent
-		Plan cm_plan = built_doc.createPlan(plan_Id); //uri to a script - take this run with Matlab
-		//execute_plan(batch_analysis, "batch_template.m");
-//		/HttpDownloadUtility.downloadFile(color_model, savedir + "\\code\\" , "make_color_model.m");
+		Activity a = null;
+		String tasbeURI = "https://github.com/jakebeal/TASBEFlowAnalytics/releases"; 
 		try {
+			//TODO
+			a = built_doc.createActivity(activity_name);
+			a.createUsage(_usage, fcs_col.getIdentity());
+			
+			Association tasbe = a.createAssociation(activity_name + "_association", new URI(tasbeURI)); 
+			//tasbe.addRole(); //test role sbol onotology?
+
+			Plan cm_plan = built_doc.createPlan(plan_Id);
+			plan = cm_plan; 
+			cm_plan.createAnnotation(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "attachment", "sbh"), new URI(color_model));
+			//cm_plan.addWasGeneratedBy(new URI(color_model)); //URI to the script
+			
+			tasbe.setPlan(cm_plan.getIdentity());
+			
+			
+		} catch (SBOLValidationException|URISyntaxException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		} 
+		cm_act = a; 
+		try {
+			HttpDownloadUtility.downloadFile(color_model,savedir , "");
 			HttpDownloadUtility.downloadFile(bead.toString(),savedir , "2012-03-12_Beads_P3.fcs");
 			HttpDownloadUtility.downloadFile(blank.toString(),savedir, "2012-03-12_blank_P3.fcs");
 			HttpDownloadUtility.downloadFile(EYFP.toString(), savedir, "2012-03-12_EYFP_P3.fcs");
@@ -108,10 +175,9 @@ public class Connector {
 		} catch (IOException e) {
 			System.out.println("File could not be downloaded"); 
 			e.printStackTrace();
+			System.exit(1);
 		}
 
-		
-		built_doc.createAgent(agent_prefix, _agent, version); 
 	}
 	
 	public void assemble_CM(Set<File> color_model)
@@ -148,14 +214,21 @@ public class Connector {
 		}
 	}
 	
-	public SBOLDocument assemble_CM(Set<File> cm, String doc_prefix, String file_prefix) throws SBOLValidationException
+	public SBOLDocument assemble_CM(Set<File> cm, String doc_prefix, String file_prefix) 
 	{
 		SBOLDocument document = new SBOLDocument();
 		document.setDefaultURIprefix(doc_prefix);
 		document.setComplete(true);
 		document.setCreateDefaults(true);
 		
-		Collection cm_col = document.createCollection("color_model"); 
+		Collection cm_col = null;
+		try {
+			cm_col = document.createCollection("color_model");
+		} catch (SBOLValidationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		} 
 		//cm_col.addWasGeneratedBy(cm_act.getIdentity()); 
 		//cm_col.addWasDerivedFrom(fcs_col.getIdentity()); 
 		for(File f : cm)
@@ -163,9 +236,28 @@ public class Connector {
 			String filename = f.getName().replace("-", "_");
 			filename = filename.replace(".", "_");
 			filename = filename.concat("_copy");
-			GenericTopLevel gtl = document.createGenericTopLevel(filename, new QName(file_prefix, "m_attachment", "tasbe")); 
-			gtl.createAnnotation(new QName(file_prefix, "color_model","CM"), f.getName());
-			cm_col.addMember(gtl.getIdentity()); 
+			GenericTopLevel gtl = null;
+			try {
+				gtl = document.createGenericTopLevel(filename, new QName(file_prefix, "m_attachment", "tasbe"));
+			} catch (SBOLValidationException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+				System.exit(1);
+			} 
+			try {
+				gtl.createAnnotation(new QName(file_prefix, "color_model","CM"), f.getName());
+			} catch (SBOLValidationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				System.exit(1);
+			}
+			try {
+				cm_col.addMember(gtl.getIdentity());
+			} catch (SBOLValidationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.exit(1);
+			} 
 		}	
 		
 		return document; 
@@ -217,9 +309,16 @@ public class Connector {
 		fw.close();
 	}
 	
-	public void matlab_work(String pathToTASBE) throws EngineException, InterruptedException, IOException 
+	public void matlab_work(String pathToTASBE)  
 	{
-		MatlabEngine eng = MatlabEngine.startMatlab();
+		MatlabEngine eng = null;
+		try {
+			eng = MatlabEngine.startMatlab();
+		} catch (EngineException | IllegalArgumentException | IllegalStateException | InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			System.exit(1);
+		}
         StringWriter writer = new StringWriter();
 		String matlab_dir = pathToTASBE + "\\plots";
 		//String plot_dir = ""; 
@@ -240,9 +339,27 @@ public class Connector {
 		catch(Exception e)
 		{
 		}
-        writer.close();
-		eng.close();
+        try {
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
+		try {
+			eng.close();
+		} catch (EngineException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 		writer.flush(); 
-		getErrors(writer, ""); 
+		try {
+			getErrors(writer, "");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		} 
 	}
 }
