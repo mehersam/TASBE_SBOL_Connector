@@ -2,7 +2,6 @@ package SBOL_TASBE_Connector;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.util.zip.ZipOutputStream;
 import javax.xml.namespace.QName;
 
 import org.sbolstandard.core2.Activity;
-import org.sbolstandard.core2.Agent;
 import org.sbolstandard.core2.Association;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.GenericTopLevel;
@@ -35,17 +33,16 @@ public class Connector {
 	private SBOLDocument built_doc; 
 	private SBOLDocument col_doc; 
 	private Collection fcs_col; 
-	private String prefix;
 	private Activity cm_act = null; 
 	private Plan plan = null; 
 	private String user = ""; 
-	public Connector(String backendUrl, String _prefix) throws SynBioHubException
+	private String version = "1";
+	public Connector(String backendUrl) throws SynBioHubException
 	{		
-		prefix = _prefix; 
 		hub = new SynBioHubFrontend(backendUrl, backendUrl);
 		
 		built_doc = new SBOLDocument();
-		built_doc.setDefaultURIprefix(prefix);
+		built_doc.setDefaultURIprefix("https://dummy.org/");
 		built_doc.setComplete(true);
 		built_doc.setCreateDefaults(true);
 	}
@@ -111,7 +108,7 @@ public class Connector {
 	}
 	
 	//retrieve the collection of fcs files
-	public SBOLDocument get_input_col(URI _fcs_col, String prefix)
+	public SBOLDocument get_input_col(URI _fcs_col)
 	{	
 		try {
 			col_doc = hub.getSBOL(_fcs_col);
@@ -145,7 +142,7 @@ public class Connector {
 	public void download_Files(String savedir, String color_model, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2)
 	{
 		try {
-			HttpDownloadUtility.downloadFile(color_model, savedir , "color_model.m");
+			//HttpDownloadUtility.downloadFile(color_model, savedir , "color_model.m");
 		//	HttpDownloadUtility.downloadFile(color_model, "" , "color_model.m");
 			HttpDownloadUtility.downloadFile(bead.toString(),savedir , "2012-03-12_Beads_P3.fcs");
 			HttpDownloadUtility.downloadFile(blank.toString(),savedir, "2012-03-12_blank_P3.fcs");
@@ -159,9 +156,9 @@ public class Connector {
 		}
 		
 	}
-	public void create_Activity(String activity_name, String plan_Id,  String agent_prefix, String _agent, String _usage, String version)
+	public void create_Activity(String activity_name, String plan_Id,  String agent_prefix, String _usage, String version)
 	{
-		String tasbeURI = "https://synbiohub.utah.edu/user/mehersam/SBOL_Software/TASBEFlowAnalytics/1.0"; 
+		String tasbeURI = "https://synbiohub.utah.edu/public/SBOL_Software/TASBEFlowAnalytics/1.0";
 		try {
 			//create the CM activity
 			cm_act = built_doc.createActivity(activity_name, version);
@@ -229,7 +226,7 @@ public class Connector {
 		
 		Collection cm_col = null;
 		try {
-			cm_col = document.createCollection("color_model");
+			cm_col = document.createCollection("color_model", version);
 		} catch (SBOLValidationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -277,8 +274,8 @@ public class Connector {
 		document.setComplete(true);
 		document.setCreateDefaults(true);
 				
-		Collection BA = document.createCollection("batch_analysis");
-		Collection cm_col = document.createCollection("color_model"); 
+		Collection BA = document.createCollection("batch_analysis", version);
+		Collection cm_col = document.createCollection("color_model", version); 
 		BA.addMember(cm_col.getIdentity());//add CM as a subcollection of BA 
 		for(File f : batch_analysis)
 		{

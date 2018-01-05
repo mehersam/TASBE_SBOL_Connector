@@ -8,12 +8,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JOptionPane;
-import javax.xml.namespace.QName;
 
-import org.omg.CORBA_2_3.portable.InputStream;
 import org.sbolstandard.core2.Annotation;
 import org.sbolstandard.core2.Collection;
-import org.sbolstandard.core2.GenericTopLevel;
 import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
@@ -29,17 +26,17 @@ import SBOL_TASBE_Connector.Connector;
 public class ConnectorController {
 
 	private Connector syb_connector = null;
-	private BrowseDialog browse = null;
+	private LoginDialog login = null;
 
-	public ConnectorController(Connector _connect, BrowseDialog _browse) throws SynBioHubException,
+	public ConnectorController(Connector _connect, LoginDialog loginDialog) throws SynBioHubException,
 			SBOLValidationException, URISyntaxException, IOException, EngineException, InterruptedException {
 		syb_connector = _connect;
-		browse = _browse;
+		login = loginDialog;
 
-		String input_fcs_col = browse.get_input_col();
+		String input_fcs_col = login.get_input_col();
 		String tasbeURI = "https://tasbe.org/";
 
-		SBOLDocument col_doc = syb_connector.get_input_col(new URI(input_fcs_col), tasbeURI);
+		SBOLDocument col_doc = syb_connector.get_input_col(new URI(input_fcs_col));
 		// get the toplevel collection of input fcs files
 		Collection input_files = col_doc.getCollection(new URI(input_fcs_col));
 		URI bead = null;
@@ -83,16 +80,15 @@ public class ConnectorController {
 
 		String displayId = input_files.getDisplayId();
 		String version = input_files.getVersion();
-		String color_model_loc = browse.get_CM();
-		String agent = browse.getAgent();
-		String tasbe_loc = browse.getTasbeLoc();
+		String color_model_loc = login.get_CM();
+		String tasbe_loc = login.getTasbeLoc();
 		String user = syb_connector.getUser();
 
 		// download the files and save them in the Tasbe dir
 		syb_connector.download_Files(tasbe_loc, color_model_loc, bead, blank, EYFP, mKate, EBFP2);
 
 		// create the activity
-		syb_connector.create_Activity(displayId + "_activity", displayId + "_color_model", agent, displayId + "_agent",
+		syb_connector.create_Activity(displayId + "_activity", displayId + "_color_model", displayId + "_agent",
 				displayId + "_usage", version);
 
 		// need to open a file explorer to choose where the tasbe package is
@@ -120,12 +116,12 @@ public class ConnectorController {
 			syb_connector.assemble_CM(cm_files);
 			syb_connector.assemble_collections(cm_files, cm_files, "https://dummy.org", tasbeURI);
 
-			JOptionPane.showMessageDialog(browse, "Assembling CM files");
+			JOptionPane.showMessageDialog(login, "Assembling CM files");
 			System.out.println("Assembling CM files");
 
 			syb_connector.assemble_CM(cm_files, "https://dummy.org", tasbeURI);
 
-			JOptionPane.showMessageDialog(browse, "Submitting CM Collection");
+			JOptionPane.showMessageDialog(login, "Submitting CM Collection");
 			System.out.println("Submitting CM Collection");
 
 			// InputStream colormodel =
@@ -133,14 +129,14 @@ public class ConnectorController {
 
 			syb_connector.submit("TASBE_Output", version, "TASBE_Output", "TASBE_Output", "ColorModelOutput.zip");
 
-			JOptionPane.showMessageDialog(browse, "Finished Submitting CM Collection");
+			JOptionPane.showMessageDialog(login, "Finished Submitting CM Collection");
 			System.out.println("Finished Submitting CM Collection");
 
 		} else {
 			System.out.println("Errors occurred in making the color model. Please check error file");
 		}
 
-		JOptionPane.showMessageDialog(browse, "Building Final Doc");
+		JOptionPane.showMessageDialog(login, "Building Final Doc");
 		System.out.println("Building Final Doc");
 		SBOLDocument finalDoc = syb_connector.get_Built_Doc();
 
@@ -171,7 +167,7 @@ public class ConnectorController {
 			System.exit(1);
 		} 
 
-		JOptionPane.showMessageDialog(browse, "Submitting Final Doc!");
+		JOptionPane.showMessageDialog(login, "Submitting Final Doc!");
 
 		System.out.println("Submitting Final Doc");
 		// upload final document
@@ -180,7 +176,6 @@ public class ConnectorController {
 		try {
 			SBOLWriter.write(finalDoc, "Final_TASBE.xml");
 		} catch (SBOLConversionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		syb_connector.submit("TASBE_SBOL_Final_Doc", version, "TASBE_SBOL_Final_Doc", "TASBE_SBOL_Final_Doc", finalDoc);
@@ -190,9 +185,10 @@ public class ConnectorController {
 		
 		frontend.attachFile(planURI, tasbe_loc + "/color_model.m");
 
-		JOptionPane.showMessageDialog(browse, "Complete!");
+		JOptionPane.showMessageDialog(login, "Complete!");
 		System.exit(0);
 
 	}
+
 
 }
