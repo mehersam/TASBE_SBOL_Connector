@@ -1,10 +1,13 @@
 package SBOL_TASBE_Connector;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,8 +22,10 @@ import org.sbolstandard.core2.Association;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.GenericTopLevel;
 import org.sbolstandard.core2.Plan;
+import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
+import org.sbolstandard.core2.SBOLWriter;
 import org.synbiohub.frontend.SynBioHubException;
 import org.synbiohub.frontend.SynBioHubFrontend;
 
@@ -72,6 +77,16 @@ public class Connector {
 		return this.cm_act; 
 	}
 	
+	public SBOLDocument get_Built_Doc()
+	{
+		return this.built_doc; 
+	}
+	
+	public SBOLDocument get_FCS_Doc()
+	{
+		return this.col_doc;
+	}
+	
 	public void login(String email, String pass) 
 	{
 		try {
@@ -107,20 +122,16 @@ public class Connector {
 		}
 	}
 	
-	//retrieve the collection of fcs files
-	public SBOLDocument get_input_col(URI _fcs_col)
-	{	
-		try {
-			col_doc = hub.getSBOL(_fcs_col);
-		} catch (SynBioHubException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(1);
-		} //this will return the sboldocument
-		fcs_col = col_doc.getCollection(_fcs_col); 
-		
-		return col_doc; 
-	} 
+	
+	public void set_FCS_col(Collection _fcs)
+	{
+		this.fcs_col = _fcs; 
+	}
+	public void set_FCS_Doc(SBOLDocument _fcs_doc)
+	{
+		this.col_doc = _fcs_doc; 
+	}
+	
 	public SBOLDocument get_Component(URI output_col) 
 	{
 		SBOLDocument found_doc = null; 
@@ -132,11 +143,6 @@ public class Connector {
 			System.exit(1);
 		}
 		return found_doc; 
-	}
-	
-	public SBOLDocument get_Built_Doc()
-	{
-		return this.built_doc; 
 	}
 	
 	public void download_Files(String savedir, String color_model, URI bead, URI blank, URI EYFP, URI mKate, URI EBFP2)
@@ -156,7 +162,7 @@ public class Connector {
 		}
 		
 	}
-	public void create_Activity(String activity_name, String plan_Id,  String agent_prefix, String _usage, String version)
+	public void create_Activity(String activity_name, String plan_Id,  String agent_prefix, String _usage, String version, String color_model)
 	{
 		String tasbeURI = "https://synbiohub.utah.edu/public/SBOL_Software/TASBEFlowAnalytics/1.0";
 		try {
@@ -167,7 +173,7 @@ public class Connector {
 			
 			//create the CM plan
 			plan = built_doc.createPlan(plan_Id, version);
-			
+			plan.createAnnotation(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "attachment", "sbh"), new URI("file:" + color_model));
 			//create the CM association
 			Association tasbe = cm_act.createAssociation(activity_name + "_association", new URI(tasbeURI)); 
 			//tasbe.addRole(); //test role sbol onotology?
@@ -182,8 +188,23 @@ public class Connector {
 		} 
 
 	}
-	
-	public void assemble_CM(Set<File> color_model)
+    private String serializeDocument(SBOLDocument document) 
+    {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        
+        try
+        {
+            SBOLWriter.write(document,  outputStream); 
+            return outputStream.toString("UTF-8");
+        }
+        catch(IOException | SBOLConversionException e)
+        {
+			System.out.println("Error serializing document" + e); 
+        }
+		return "";
+    }
+    
+	public void assemble_CM(SBOLDocument _doc, Set<File> color_model, String color_model_script)
 	{
 		 //zip up the set of files
 		try
@@ -209,6 +230,25 @@ public class Connector {
 				zos.closeEntry(); 
 				fis.close();
 			}
+			
+			//zip up the SBOLDocument 
+	    	InputStream sbolDoc = new ByteArrayInputStream(serializeDocument(_doc).getBytes());
+			zos.putNextEntry(new ZipEntry("Final_SBOLDocument"));
+			
+			int length; 
+			while((length = sbolDoc.read(buffer)) > 0)
+			{
+				zos.write(buffer, 0, length);
+			}
+			
+			length = 0; 
+			InputStream colorModel = new FileInputStream(color_model_script); 
+			zos.putNextEntry(new ZipEntry(new File(color_model_script).getName()));
+			while((length = colorModel.read(buffer)) > 0)
+			{
+				zos.write(buffer, 0, length);
+			}
+			colorModel.close();
 			zos.close();
 		}
 		catch(IOException e)

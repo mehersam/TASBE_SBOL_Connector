@@ -16,6 +16,6 @@ public class TASBE_Collections {
 			SBOLValidationException, EngineException, InterruptedException {
 
 		new LoginDialog("https://synbiohub.utah.edu/");	
-		return; 
+		//return; 
 	}
 }
