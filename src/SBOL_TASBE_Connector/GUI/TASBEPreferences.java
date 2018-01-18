@@ -2,41 +2,43 @@ package SBOL_TASBE_Connector.GUI;
 
 import java.util.prefs.Preferences;
 
-import edu.utah.ece.async.sboldesigner.versioning.Infos;
-import edu.utah.ece.async.sboldesigner.versioning.PersonInfo;
 
 public enum TASBEPreferences {
 	INSTANCE;
 
-	private PersonInfo userInfo = null;
+	private EnvInfo envInfo = null;
 
-	public PersonInfo getUserInfo() {
-		if (userInfo == null) {
+	public EnvInfo getEnvInfo() {
+		if (envInfo == null) {
 			Preferences prefs = Preferences.userNodeForPackage(TASBEPreferences.class).node("user");
-			String name = prefs.get("name", "");
-			String email = prefs.get("email", "");
-			String uri = prefs.get("uri", "http://www.dummy.org");
-			userInfo = Infos.forPerson(uri, name, email);
+			String cm_loc = prefs.get("cm", "");
+			String tasbe_loc = prefs.get("tasbe", "");
+			envInfo = Infos.forEnv(cm_loc, tasbe_loc);
 		}
 
-		return userInfo;
+		return envInfo;
 	}
 
-	public void saveUserInfo(PersonInfo userInfo) {
-		this.userInfo = userInfo;
+	public void saveUserInfo(EnvInfo envInfo) {
+		this.envInfo = envInfo;
 
 		Preferences prefs = Preferences.userNodeForPackage(TASBEPreferences.class).node("user");
 
 		try {
-			if (userInfo == null) {
+			if (envInfo == null) {
 				prefs.removeNode();
 			} else {
-				prefs.put("uri", userInfo.getURI().toString());
-				prefs.put("name", userInfo.getName());
-				if (userInfo.getEmail() != null) {
-					prefs.put("email", userInfo.getEmail().toString());
-				} else {
-					prefs.put("email", "");
+				if (envInfo.getCMLoc() != null) {
+					prefs.put("cm", envInfo.getCMLoc());
+				} 
+				else {
+					prefs.put("cm", "");
+				}
+				if (envInfo.getTASBELoc() != null) {
+					prefs.put("tasbe", envInfo.getTASBELoc());
+				} 
+				else {
+					prefs.put("tasbe", "");
 				}
 			}
 

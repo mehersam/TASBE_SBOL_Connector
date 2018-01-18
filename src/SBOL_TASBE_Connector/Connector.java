@@ -164,7 +164,7 @@ public class Connector {
 	}
 	public void create_Activity(String activity_name, String plan_Id,  String agent_prefix, String _usage, String version, String color_model)
 	{
-		String tasbeURI = "https://synbiohub.utah.edu/public/SBOL_Software/TASBEFlowAnalytics/1.0";
+		String tasbeURI = "https://synbiohub.utah.edu/public/SBOL_Software/TASBEFlowAnalytics/1";
 		try {
 			//create the CM activity
 			cm_act = built_doc.createActivity(activity_name, version);

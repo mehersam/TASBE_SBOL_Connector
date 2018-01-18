@@ -84,29 +84,29 @@ public class ConnectorController {
 		}
 
 		syb_connector.set_FCS_col(fcs);
-		System.out.println(fcs.getIdentity()); 
 		String displayId = "TASBE";
 		String version = "1.0";
-		String color_model_loc = login.getPref().getCMLoc(); 
-		String tasbe_loc = login.getPref().getTasbeLoc();
+		String color_model_loc = login.getCMLoc();
+		String tasbe_loc = login.getTASBELoc();
 
+		System.out.println("Downloading Files");
 		// download the files and save them in the Tasbe dir
 		syb_connector.download_Files(tasbe_loc, color_model_loc, bead, blank, EYFP, mKate, EBFP2);
 
 		// create the activity
 		syb_connector.create_Activity(displayId + "_activity", displayId + "_color_model", displayId + "_agent",
-				displayId + "_usage", version, new File(login.getPref().getCMLoc()).getName());
+				displayId + "_usage", version, new File(login.getCMLoc()).getName());
 
 		// need to open a file explorer to choose where the tasbe package is
 		// go do matlab work because files should be there.
 
 		// JOptionPane.showMessageDialog(browse, "Beginning Matlab work");
 		//
-		// System.out.println("Beginning Matlab work");
-		// syb_connector.matlab_work(tasbe_loc + "\\code");
-		//
+		System.out.println("Beginning Matlab work");
+		//syb_connector.matlab_work(tasbe_loc + "\\code");
+		
 		// JOptionPane.showMessageDialog(browse, "Finished Matlab work");
-		// System.out.println("Finished Matlab work");
+		System.out.println("Finished Matlab work");
 
 		String plot_dir = tasbe_loc + "\\code\\plots";
 
@@ -129,6 +129,7 @@ public class ConnectorController {
 		
 		//TODO: adding script file
 		//zip doc and files
+		System.out.println("Assembling Color Model Files");
 		syb_connector.assemble_CM(finalDoc, cm_files, color_model_loc);
 		
 		/*
@@ -138,7 +139,8 @@ public class ConnectorController {
 		} catch (SBOLConversionException e) {
 			e.printStackTrace();
 		}*/
-				
+		
+		System.out.println("Uploading Final Document");	
 		//upload Final Document and results
 		login.upload(null, new File("ColorModelOutput.zip"));
 		

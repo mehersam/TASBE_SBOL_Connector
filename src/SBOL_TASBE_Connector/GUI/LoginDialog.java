@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,10 +35,10 @@ import org.synbiohub.frontend.SynBioHubException;
 import com.mathworks.engine.EngineException;
 
 import SBOL_TASBE_Connector.Connector;
+import edu.utah.ece.async.sboldesigner.sbol.SBOLUtils.Types;
 import edu.utah.ece.async.sboldesigner.sbol.editor.SBOLDesign;
 import edu.utah.ece.async.sboldesigner.sbol.editor.dialog.RegistryInputDialog;
-import edu.utah.ece.async.sboldesigner.sbol.SBOLUtils.Types;
-import edu.utah.ece.async.sboldesigner.sbol.SBOLUtils.Types.*;
+
 
 @SuppressWarnings("serial")
 public class LoginDialog extends JDialog implements ActionListener {
@@ -58,7 +59,7 @@ public class LoginDialog extends JDialog implements ActionListener {
 	private JButton download_Collection_button = new JButton("Download Collection");
 	private JButton preferences_button = new JButton("Preferences");
 	
-	private PreferencesDialogOLD prefDialog = null; 
+	private PreferencesDialog prefDialog = null; 
 	private EnvInfo env = null; 
 	
 	public LoginDialog(String backendUrl) {
@@ -113,9 +114,21 @@ public class LoginDialog extends JDialog implements ActionListener {
 		return connect;
 	}
 
-	public PreferencesDialogOLD getPref()
+	public PreferencesDialog getPref()
 	{
 		return this.prefDialog; 
+	}
+	
+	public String getCMLoc()
+	{
+		Preferences prefs = Preferences.userNodeForPackage(TASBEPreferences.class).node("user");
+		return prefs.get("cm", "");
+	}
+	public String getTASBELoc()
+	{
+		Preferences prefs = Preferences.userNodeForPackage(TASBEPreferences.class).node("user");
+
+		return prefs.get("tasbe", "");	
 	}
 	
 	private void downloadSynBioHub() {
@@ -197,9 +210,7 @@ public class LoginDialog extends JDialog implements ActionListener {
 
 		if(e.getSource() == preferences_button)
 		{
-			prefDialog = new PreferencesDialogOLD(env); 
-			if(prefDialog.getEnv() != null)
-				env = prefDialog.getEnv(); 
+			PreferencesDialog.showPreferences(LoginDialog.this, EnvInfoTab.INSTANCE.getTitle());	
 		}
 		
 		

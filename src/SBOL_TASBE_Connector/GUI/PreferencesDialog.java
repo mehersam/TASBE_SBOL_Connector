@@ -62,6 +62,7 @@ public class PreferencesDialog extends JDialog implements ActionListener {
 		PreferencesDialog dialog = new PreferencesDialog(parent, selectTab);
 		dialog.setVisible(true);
 	}
+	
 
 	private PreferencesDialog(Component parent, String selectTab) {
 		super(JOptionPane.getFrameForComponent(parent), TITLE, true);
@@ -146,6 +147,10 @@ public class PreferencesDialog extends JDialog implements ActionListener {
 	}
 
 	public interface PreferencesTab {
+		String getCM(); 
+		
+		String getTASBE(); 
+		
 		String getTitle();
 
 		String getDescription();
