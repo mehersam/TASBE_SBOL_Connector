@@ -18,6 +18,7 @@ import java.util.zip.ZipOutputStream;
 import javax.xml.namespace.QName;
 
 import org.sbolstandard.core2.Activity;
+import org.sbolstandard.core2.ActivityRoleType;
 import org.sbolstandard.core2.Association;
 import org.sbolstandard.core2.Collection;
 import org.sbolstandard.core2.GenericTopLevel;
@@ -26,6 +27,7 @@ import org.sbolstandard.core2.SBOLConversionException;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLValidationException;
 import org.sbolstandard.core2.SBOLWriter;
+import org.sbolstandard.core2.Usage;
 import org.synbiohub.frontend.SynBioHubException;
 import org.synbiohub.frontend.SynBioHubFrontend;
 
@@ -169,15 +171,15 @@ public class Connector {
 			//create the CM activity
 			cm_act = built_doc.createActivity(activity_name, version);
 			
-			cm_act.createUsage(_usage, fcs_col.getIdentity()); //input collection
-			
+			Usage cm_use = cm_act.createUsage(_usage, fcs_col.getIdentity()); //input collection
+			cm_use.addRole(ActivityRoleType.TEST); 
 			//create the CM plan
 			plan = built_doc.createPlan(plan_Id, version);
 			plan.createAnnotation(new QName("http://wiki.synbiohub.org/wiki/Terms/synbiohub#", "attachment", "sbh"), new URI("file:" + color_model));
 			//create the CM association
 			Association tasbe = cm_act.createAssociation(activity_name + "_association", new URI(tasbeURI)); 
-			//tasbe.addRole(); //test role sbol onotology?
-
+			tasbe.addRole(ActivityRoleType.LEARN); //test role sbol onotology?
+			
 			//set the plan to the association
 			tasbe.setPlan(plan.getIdentity());
 			

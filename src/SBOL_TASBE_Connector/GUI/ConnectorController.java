@@ -102,11 +102,11 @@ public class ConnectorController {
 
 		// JOptionPane.showMessageDialog(browse, "Beginning Matlab work");
 		//
-		System.out.println("Beginning Matlab work");
+		//System.out.println("Beginning Matlab work");
 		//syb_connector.matlab_work(tasbe_loc + "\\code");
 		
 		// JOptionPane.showMessageDialog(browse, "Finished Matlab work");
-		System.out.println("Finished Matlab work");
+		//System.out.println("Finished Matlab work");
 
 		String plot_dir = tasbe_loc + "\\code\\plots";
 
